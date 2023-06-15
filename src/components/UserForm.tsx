@@ -1,24 +1,11 @@
 "use client";
 
 import React from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./Input";
-
-type formData = {
-  name: string;
-  direccion: string;
-  email: string;
-  pais: string;
-};
-
-const UserSchema: z.ZodType<formData> = z.object({
-  name: z.string().min(2).nonempty(),
-  direccion: z.string().min(2).nonempty(),
-  email: z.string().email().nonempty(),
-  pais: z.string().min(2).nonempty(),
-});
+import Select from "./Select";
 
 const paises = [
   "Afganistán",
@@ -218,9 +205,24 @@ const paises = [
   "Zimbabue",
 ];
 
+type formData = {
+  name: string;
+  direccion: string;
+  email: string;
+  pais: string;
+};
+
+const UserSchema: z.ZodType<formData> = z.object({
+  name: z.string().min(2).nonempty(),
+  direccion: z.string().min(2).nonempty(),
+  email: z.string().email().nonempty(),
+  pais: z.string().nonempty(),
+});
+
 const UserForm = () => {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<z.infer<typeof UserSchema>>({
@@ -232,7 +234,7 @@ const UserForm = () => {
   ) => console.log("IT WORKED", data);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit, console.log)}>
       <Input
         label="Full name"
         type="text"
@@ -257,12 +259,10 @@ const UserForm = () => {
         error={errors.direccion}
       />
 
-      <Input
-        label="Pais"
-        type="select"
-        placeholder="Uruguay"
+      <Select
         {...register("pais")}
-        error={errors.direccion}
+        label="Pais"
+        error={errors.pais}
         options={paises}
       />
 
