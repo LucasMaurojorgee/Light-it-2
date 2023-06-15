@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./Input";
 import Select from "./Select";
+import { Radious } from "./Radious";
 
 const paises = [
   "Afganistán",
@@ -205,24 +206,27 @@ const paises = [
   "Zimbabue",
 ];
 
+const gender = ["male", "female", "intersex"];
+
 type formData = {
   name: string;
   direccion: string;
   email: string;
   pais: string;
+  gender: string;
 };
 
 const UserSchema: z.ZodType<formData> = z.object({
   name: z.string().min(2).nonempty(),
   direccion: z.string().min(2).nonempty(),
   email: z.string().email().nonempty(),
-  pais: z.string().nonempty(),
+  pais: z.string().nonempty("You have to select a country"),
+  gender: z.string().nonempty(),
 });
 
 const UserForm = () => {
   const {
     register,
-    control,
     handleSubmit,
     formState: { errors },
   } = useForm<z.infer<typeof UserSchema>>({
@@ -234,40 +238,64 @@ const UserForm = () => {
   ) => console.log("IT WORKED", data);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, console.log)}>
-      <Input
-        label="Full name"
-        type="text"
-        placeholder="Lucas Maurojorge"
-        {...register("name")}
-        error={errors.name}
-      />
+    <div>
+      <form
+        onSubmit={handleSubmit(onSubmit, console.log)}
+        className='flex flex-col items-center bg-yellow-100'
+      >
+        <Input
+          label='Full name'
+          type='text'
+          placeholder='Lucas Maurojorge'
+          {...register("name")}
+          error={errors.name}
+        />
 
-      <Input
-        label=" Email"
-        type="email"
-        placeholder="example@gmail.com"
-        {...register("email")}
-        error={errors.email}
-      />
+        <Input
+          label=' Email'
+          type='email'
+          placeholder='example@gmail.com'
+          {...register("email")}
+          error={errors.email}
+        />
 
-      <Input
-        label="Dirección"
-        type="text"
-        placeholder="Portugal 3417"
-        {...register("direccion")}
-        error={errors.direccion}
-      />
+        <Input
+          label='Dirección'
+          type='text'
+          placeholder='Portugal 3417'
+          {...register("direccion")}
+          error={errors.direccion}
+        />
 
-      <Select
-        {...register("pais")}
-        label="Pais"
-        error={errors.pais}
-        options={paises}
-      />
+        <Select
+          {...register("pais")}
+          label='Pais'
+          error={errors.pais}
+          options={paises}
+          width='64'
+        />
 
-      <button type="submit">submit</button>
-    </form>
+        <div className='flex flex-col items'>
+          <p className='text-black'>Gender</p>
+          {gender.map((e) => (
+            <Radious
+              label={e}
+              value={e}
+              {...register("gender")}
+              text='What was the sex you were assigned at birth'
+              error={errors.gender}
+            />
+          ))}
+        </div>
+
+        <button
+          type='submit'
+          className='inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 m-4'
+        >
+          Submit
+        </button>
+      </form>
+    </div>
   );
 };
 
