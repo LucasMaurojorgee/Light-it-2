@@ -3,12 +3,11 @@ import React from "react";
 type checkBoxProps = {
   label: string;
   text: string;
-  error: any;
   value: string;
 };
 
 export const Radious = React.forwardRef<HTMLInputElement, checkBoxProps>(
-  ({ label, error, text, value, ...props }, ref) => {
+  ({ label, text, value, ...props }, ref) => {
     return (
       <>
         <div>
@@ -29,7 +28,6 @@ export const Radious = React.forwardRef<HTMLInputElement, checkBoxProps>(
             </div>
           </fieldset>
         </div>
-        {error && <p className='text-red-600'>{error.gender}</p>}
       </>
     );
   }

@@ -283,9 +283,9 @@ const UserForm = () => {
               value={e}
               {...register("gender")}
               text='What was the sex you were assigned at birth'
-              error={errors.gender}
             />
           ))}
+          {errors.gender && <p>{errors.gender.message}</p>}
         </div>
 
         <button
