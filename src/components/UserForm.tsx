@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./Input";
 import Select from "./Select";
 import { Radious } from "./Radious";
+import { redirect } from "next/navigation";
+import { userData } from "@/types/userData";
 
 const paises = [
   "Afganistán",
@@ -208,23 +210,16 @@ const paises = [
 
 const gender = ["male", "female", "intersex"];
 
-type formData = {
-  name: string;
-  direccion: string;
-  email: string;
-  pais: string;
-  gender: string;
-};
-
-const UserSchema: z.ZodType<formData> = z.object({
+const UserSchema: z.ZodType<userData> = z.object({
   name: z.string().min(2).nonempty(),
   direccion: z.string().min(2).nonempty(),
   email: z.string().email().nonempty(),
   pais: z.string().nonempty("You have to select a country"),
-  gender: z.string().nonempty(),
+  gender: z.string(),
 });
 
 const UserForm = () => {
+  const [data, setData] = useState<userData>();
   const {
     register,
     handleSubmit,
@@ -234,13 +229,20 @@ const UserForm = () => {
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof UserSchema>> = (
-    data: formData
-  ) => console.log("IT WORKED", data);
+    data: userData
+  ) => {
+    setData(data);
+    localStorage.setItem("formData", JSON.stringify(data));
+  };
+
+  if (data?.name) {
+    redirect("/completeForm");
+  }
 
   return (
     <div>
       <form
-        onSubmit={handleSubmit(onSubmit, console.log)}
+        onSubmit={handleSubmit(onSubmit)}
         className='flex flex-col items-center bg-yellow-100'
       >
         <Input
@@ -285,7 +287,9 @@ const UserForm = () => {
               text='What was the sex you were assigned at birth'
             />
           ))}
-          {errors.gender && <p>{errors.gender.message}</p>}
+          {errors.gender && (
+            <p className='text-red-600'>{errors.gender.message}</p>
+          )}
         </div>
 
         <button
