@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { SetStateAction, Dispatch, useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./Input";
 import Select from "./Select";
 import { Radious } from "./Radious";
-import { redirect } from "next/navigation";
 import { userData } from "@/types/userData";
 
 const paises = [
@@ -215,44 +214,79 @@ const UserSchema: z.ZodType<userData> = z.object({
   direccion: z.string().min(2).nonempty(),
   email: z.string().email().nonempty(),
   pais: z.string().nonempty("You have to select a country"),
-  gender: z.string(),
+  gender: z.string({
+    invalid_type_error: "Select your gender",
+  }),
 });
 
-const UserForm = () => {
-  const [data, setData] = useState<userData>();
+type userFormProps = {
+  people: userData[];
+  setPeople: Dispatch<SetStateAction<userData[]>>;
+  setOpen: (value: boolean) => void;
+  id: any;
+  editUser: (id: number, data: userData) => void;
+  edit: boolean;
+};
+
+const UserForm = ({
+  people,
+  setPeople,
+  setOpen,
+  id,
+  editUser,
+  edit,
+}: userFormProps) => {
+  const [count, setCount] = useState<number>(1);
+
+  const currentUser = people.find((person) => id === person.id);
+
+  console.log(currentUser);
+
   const {
     register,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors },
   } = useForm<z.infer<typeof UserSchema>>({
     resolver: zodResolver(UserSchema),
+    defaultValues: {
+      name: edit ? currentUser?.name : "",
+      direccion: edit ? currentUser?.direccion : "",
+      email: edit ? currentUser?.email : "",
+      pais: edit ? currentUser?.pais : "",
+      gender: "",
+    },
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof UserSchema>> = (
     data: userData
   ) => {
-    setData(data);
-    localStorage.setItem("formData", JSON.stringify(data));
+    localStorage.setItem("formData", JSON.stringify({ id: count, data }));
+    setPeople([
+      ...people,
+      {
+        id: count,
+        name: data.name,
+        direccion: data.direccion,
+        email: data.email,
+        pais: data.pais,
+        gender: data.gender,
+      },
+    ]);
+    setCount(count + 1);
   };
-
-  if (data?.name) {
-    redirect("/completeForm");
-  }
 
   return (
     <div>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className='flex flex-col items-center bg-yellow-100'
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className=''>
         <Input
-          label='Full name'
+          label='Name'
           type='text'
-          placeholder='Lucas Maurojorge'
+          placeholder='Your name'
           {...register("name")}
           error={errors.name}
         />
-
         <Input
           label=' Email'
           type='email'
@@ -260,44 +294,56 @@ const UserForm = () => {
           {...register("email")}
           error={errors.email}
         />
-
         <Input
           label='Dirección'
           type='text'
-          placeholder='Portugal 3417'
+          placeholder='Your direction'
           {...register("direccion")}
           error={errors.direccion}
         />
-
         <Select
           {...register("pais")}
           label='Pais'
+          placeholder='Select a country'
           error={errors.pais}
           options={paises}
-          width='64'
+          width='full'
         />
-
-        <div className='flex flex-col items'>
-          <p className='text-black'>Gender</p>
+        <div className='flex flex-col p-3'>
+          <p className='text-black text-base'>Gender</p>
           {gender.map((e) => (
-            <Radious
-              label={e}
-              value={e}
-              {...register("gender")}
-              text='What was the sex you were assigned at birth'
-            />
+            <Radious key={e} label={e} value={e} {...register("gender")} />
           ))}
           {errors.gender && (
-            <p className='text-red-600'>{errors.gender.message}</p>
+            <p className='text-red-600 pt-1'>{errors.gender.message}</p>
           )}
         </div>
 
-        <button
-          type='submit'
-          className='inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 m-4'
-        >
-          Submit
-        </button>
+        <div className='float-right'>
+          <button
+            type='button'
+            className='mx-3 my-2 right-0 rounded-md bg-white px-3 py-2 text-sm border-violet-600 text-violet-600 shadow-sm ring-1 ring-inset ring-violet-600 hover:bg-gray-50'
+            onClick={() => {
+              setOpen(false);
+            }}
+          >
+            Cancel
+          </button>
+
+          <button
+            type={`${edit ? "button" : "submit"}`}
+            className='rounded-md bg-violet-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+            onClick={() => {
+              edit
+                ? trigger().then((status) => {
+                    status && editUser(id, getValues());
+                  })
+                : null;
+            }}
+          >
+            Save User
+          </button>
+        </div>
       </form>
     </div>
   );

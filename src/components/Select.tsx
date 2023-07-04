@@ -15,22 +15,22 @@ const Select = React.forwardRef<HTMLSelectElement, inputProps>(
     return (
       <>
         <div className='p-3'>
-          <label className='block text-sm font-medium leading-6 text-gray-900'>
+          <label className='block text-base font-medium leading-6 text-gray-900'>
             {label}
           </label>
           <select
-            className={`mt-2 block w-${width} rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6`}
+            className={`mt-2 block w-${width} rounded-md border-0 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6`}
             placeholder={placeholder}
             {...props}
             ref={ref}
           >
-            <option value=''>-</option>
+            <option value=''>{placeholder}</option>
             {options?.map((e) => (
               <option value={e}>{e}</option>
             ))}
           </select>
+          {error && <p className='text-red-600 pt-1'>{error.message}</p>}
         </div>
-        {error && <p className='text-red-600'>{error.message}</p>}
       </>
     );
   }

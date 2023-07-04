@@ -2,12 +2,11 @@ import React from "react";
 
 type checkBoxProps = {
   label: string;
-  text: string;
   value: string;
 };
 
 export const Radious = React.forwardRef<HTMLInputElement, checkBoxProps>(
-  ({ label, text, value, ...props }, ref) => {
+  ({ label, value, ...props }, ref) => {
     return (
       <>
         <div>
@@ -15,6 +14,7 @@ export const Radious = React.forwardRef<HTMLInputElement, checkBoxProps>(
             <div className='space-y-4'>
               <div className='flex items-center'>
                 <input
+                  id={label}
                   type='radio'
                   className='h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600'
                   ref={ref}
