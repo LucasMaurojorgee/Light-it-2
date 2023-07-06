@@ -8,11 +8,20 @@ import { userData } from "@/types/userData";
 import { Menu } from "@headlessui/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 
+const defaultUser = {
+  name: "",
+  direccion: "",
+  email: "",
+  pais: "",
+  gender: "",
+};
+
 const userList = () => {
   const [open, setOpen] = useState(true);
   const [people, setPeople] = useState<userData[]>([]);
   const [edit, setEdit] = useState<boolean>(false);
   const [id, setId] = useState<number>();
+  const [currentFormData, setCurrentFormData] = useState<userData>(defaultUser);
 
   const editUser = (id: number, data: userData) => {
     const peopleCopy = [...people];
@@ -26,6 +35,12 @@ const userList = () => {
       pais: data.pais,
       gender: data.gender,
     };
+
+    setPeople(peopleCopy);
+  };
+
+  const deleteUserById = (id: number) => {
+    const peopleCopy = people.filter((people) => people.id != id);
 
     setPeople(peopleCopy);
   };
@@ -45,6 +60,8 @@ const userList = () => {
             edit={edit}
             editUser={editUser}
             id={id}
+            currentFormData={currentFormData}
+            setCurrentFormData={setCurrentFormData}
           />
         </SideBar>
 
@@ -81,6 +98,7 @@ const userList = () => {
             setOpen={setOpen}
             setId={setId}
             setEdit={setEdit}
+            deleteUserById={deleteUserById}
           />
         </div>
       </div>

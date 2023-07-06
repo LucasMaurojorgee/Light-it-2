@@ -8,6 +8,7 @@ import Input from "./Input";
 import Select from "./Select";
 import { Radious } from "./Radious";
 import { userData } from "@/types/userData";
+import Swal from "sweetalert2";
 
 const paises = [
   "Afganistán",
@@ -226,6 +227,8 @@ type userFormProps = {
   id: any;
   editUser: (id: number, data: userData) => void;
   edit: boolean;
+  currentFormData: any;
+  setCurrentFormData: (value: userData) => void;
 };
 
 const UserForm = ({
@@ -235,12 +238,12 @@ const UserForm = ({
   id,
   editUser,
   edit,
+  currentFormData,
+  setCurrentFormData,
 }: userFormProps) => {
   const [count, setCount] = useState<number>(1);
 
   const currentUser = people.find((person) => id === person.id);
-
-  console.log(currentUser);
 
   const {
     register,
@@ -248,15 +251,17 @@ const UserForm = ({
     getValues,
     trigger,
     formState: { errors },
+    reset,
   } = useForm<z.infer<typeof UserSchema>>({
     resolver: zodResolver(UserSchema),
     defaultValues: {
-      name: edit ? currentUser?.name : "",
-      direccion: edit ? currentUser?.direccion : "",
-      email: edit ? currentUser?.email : "",
-      pais: edit ? currentUser?.pais : "",
-      gender: "",
+      name: edit ? currentUser?.name : currentFormData.name,
+      direccion: edit ? currentUser?.direccion : currentFormData.direccion,
+      email: edit ? currentUser?.email : currentFormData.email,
+      pais: edit ? currentUser?.pais : currentFormData.pais,
+      gender: edit ? currentUser?.gender : currentFormData.gender,
     },
+    mode: "onChange",
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof UserSchema>> = (
@@ -275,7 +280,31 @@ const UserForm = ({
       },
     ]);
     setCount(count + 1);
+
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: "User created",
+      showConfirmButton: false,
+      timer: 1000,
+    });
+
+    reset({
+      name: "",
+      direccion: "",
+      email: "",
+      pais: "",
+      gender: "",
+    });
   };
+
+  useEffect(() => {
+    setCurrentFormData(getValues());
+
+    return () => {
+      setCurrentFormData(getValues());
+    };
+  }, []);
 
   return (
     <div>
@@ -324,6 +353,20 @@ const UserForm = ({
             type='button'
             className='mx-3 my-2 right-0 rounded-md bg-white px-3 py-2 text-sm border-violet-600 text-violet-600 shadow-sm ring-1 ring-inset ring-violet-600 hover:bg-gray-50'
             onClick={() => {
+              setCurrentFormData({
+                name: "",
+                direccion: "",
+                email: "",
+                pais: "",
+                gender: "",
+              });
+              reset({
+                name: "",
+                direccion: "",
+                email: "",
+                pais: "",
+                gender: "",
+              });
               setOpen(false);
             }}
           >

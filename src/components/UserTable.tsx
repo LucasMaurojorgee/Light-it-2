@@ -3,15 +3,24 @@
 import { userData } from "@/types/userData";
 import Image from "next/image";
 import userImg from "../../public/user.png";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import Swal from "sweetalert2";
 
 type tableProps = {
   people: Array<userData>;
   setOpen: (value: boolean) => void;
   setId: (value: number) => void;
   setEdit: (value: boolean) => void;
+  deleteUserById: (id: number) => void;
 };
 
-export const UserTable = ({ people, setOpen, setId, setEdit }: tableProps) => {
+export const UserTable = ({
+  people,
+  setOpen,
+  setId,
+  setEdit,
+  deleteUserById,
+}: tableProps) => {
   let count = 2;
 
   return (
@@ -57,6 +66,12 @@ export const UserTable = ({ people, setOpen, setId, setEdit }: tableProps) => {
                 >
                   Edit
                 </th>
+                <th
+                  scope='col'
+                  className='text-sm font-semibold text-[#949599] py-4'
+                >
+                  Other
+                </th>
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-200 '>
@@ -94,6 +109,32 @@ export const UserTable = ({ people, setOpen, setId, setEdit }: tableProps) => {
                     >
                       Edit
                     </button>
+                  </td>
+                  <td className='flex justify-center'>
+                    <TrashIcon
+                      className='text-black w-9 h-9 cursor-pointer'
+                      onClick={() => {
+                        Swal.fire({
+                          title: "Are you sure?",
+                          text: "You won't be able to revert this!",
+                          icon: "warning",
+                          showCancelButton: true,
+                          confirmButtonColor: "#3085d6",
+                          cancelButtonColor: "#d33",
+                          confirmButtonText: "Yes, delete it!",
+                        }).then((result) => {
+                          if (result.isConfirmed) {
+                            Swal.fire(
+                              "User deleted!",
+                              "User has been deleted.",
+                              "success"
+                            );
+
+                            person.id && deleteUserById(person.id);
+                          }
+                        });
+                      }}
+                    />
                   </td>
                 </tr>
               ))}
