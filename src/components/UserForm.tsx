@@ -381,19 +381,17 @@ const UserForm = ({
                 ? Swal.fire({
                     title: "Do you want to save the changes?",
                     showDenyButton: true,
-                    showCancelButton: true,
                     confirmButtonText: "Save",
                     denyButtonText: `Don't save`,
                   }).then((result) => {
                     if (result.isConfirmed) {
                       Swal.fire("Saved!", "", "success");
+                      trigger().then((status) => {
+                        status && editUser(id, getValues());
+                      });
                     } else if (result.isDenied) {
                       Swal.fire("Changes are not saved", "", "info");
                     }
-
-                    trigger().then((status) => {
-                      status && editUser(id, getValues());
-                    });
                   })
                 : null;
             }}
