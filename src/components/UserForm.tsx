@@ -378,13 +378,27 @@ const UserForm = ({
             className='rounded-md bg-violet-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
             onClick={() => {
               edit
-                ? trigger().then((status) => {
-                    status && editUser(id, getValues());
+                ? Swal.fire({
+                    title: "Do you want to save the changes?",
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: "Save",
+                    denyButtonText: `Don't save`,
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      Swal.fire("Saved!", "", "success");
+                    } else if (result.isDenied) {
+                      Swal.fire("Changes are not saved", "", "info");
+                    }
+
+                    trigger().then((status) => {
+                      status && editUser(id, getValues());
+                    });
                   })
                 : null;
             }}
           >
-            Save User
+            {edit ? "Edit User" : "Save User"}
           </button>
         </div>
       </form>
