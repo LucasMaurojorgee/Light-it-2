@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Lucas",
+      "direccion": "Portugal 3417",
+      "email": "lucas.maurojorge@gmail.com",
+      "pais": "Uruguay",
+      "gender": "Male"
+    },
+    {
+      "id": 2,
+      "name": "Fausto",
+      "direccion": "Grecia 1214",
+      "email": "fasto.perez@gmail.com",
+      "pais": "Uruguay",
+      "gender": "Male"
+    }
+  ]
+}

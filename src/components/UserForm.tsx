@@ -308,50 +308,50 @@ const UserForm = ({
 
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)} className=''>
+      <form onSubmit={handleSubmit(onSubmit)} className="">
         <Input
-          label='Name'
-          type='text'
-          placeholder='Your name'
+          label="Name"
+          type="text"
+          placeholder="Your name"
           {...register("name")}
           error={errors.name}
         />
         <Input
-          label=' Email'
-          type='email'
-          placeholder='example@gmail.com'
+          label=" Email"
+          type="email"
+          placeholder="example@gmail.com"
           {...register("email")}
           error={errors.email}
         />
         <Input
-          label='Dirección'
-          type='text'
-          placeholder='Your direction'
+          label="Dirección"
+          type="text"
+          placeholder="Your direction"
           {...register("direccion")}
           error={errors.direccion}
         />
         <Select
           {...register("pais")}
-          label='Pais'
-          placeholder='Select a country'
+          label="Pais"
+          placeholder="Select a country"
           error={errors.pais}
           options={paises}
-          width='full'
+          width="full"
         />
-        <div className='flex flex-col p-3'>
-          <p className='text-black text-base'>Gender</p>
+        <div className="flex flex-col p-3">
+          <p className="text-black text-base">Gender</p>
           {gender.map((e) => (
             <Radious key={e} label={e} value={e} {...register("gender")} />
           ))}
           {errors.gender && (
-            <p className='text-red-600 pt-1'>{errors.gender.message}</p>
+            <p className="text-red-600 pt-1">{errors.gender.message}</p>
           )}
         </div>
 
-        <div className='float-right'>
+        <div className="float-right">
           <button
-            type='button'
-            className='mx-3 my-2 right-0 rounded-md bg-white px-3 py-2 text-sm border-violet-600 text-violet-600 shadow-sm ring-1 ring-inset ring-violet-600 hover:bg-gray-50'
+            type="button"
+            className="mx-3 my-2 right-0 rounded-md bg-white px-3 py-2 text-sm border-violet-600 text-violet-600 shadow-sm ring-1 ring-inset ring-violet-600 hover:bg-gray-50"
             onClick={() => {
               setCurrentFormData({
                 name: "",
@@ -375,7 +375,7 @@ const UserForm = ({
 
           <button
             type={`${edit ? "button" : "submit"}`}
-            className='rounded-md bg-violet-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+            className="rounded-md bg-violet-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             onClick={() => {
               edit
                 ? Swal.fire({
