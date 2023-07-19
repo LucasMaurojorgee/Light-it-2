@@ -7,10 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./Input";
 import Select from "./Select";
 import { Radious } from "./Radious";
-import { userData } from "@/types/userData";
+import { User } from "@/types/User";
 import Swal from "sweetalert2";
 
-const paises = [
+const countries = [
   "Afganistán",
   "Albania",
   "Alemania",
@@ -208,103 +208,85 @@ const paises = [
   "Zimbabue",
 ];
 
-const gender = ["male", "female", "intersex"];
+const gender = ["male", "female", "intersex", "non-binary"];
 
-const UserSchema: z.ZodType<userData> = z.object({
-  name: z.string().min(2).nonempty(),
-  direccion: z.string().min(2).nonempty(),
-  email: z.string().email().nonempty(),
-  pais: z.string().nonempty("You have to select a country"),
+const UserSchema = z.object({
+  name: z.string().min(1),
+  address: z.string().min(1),
+  email: z.string().email(),
+  country: z.string().nonempty("You have to select a country"),
   gender: z.string({
     invalid_type_error: "Select your gender",
   }),
 });
 
-type userFormProps = {
-  people: userData[];
-  setPeople: Dispatch<SetStateAction<userData[]>>;
-  setOpen: (value: boolean) => void;
-  id: any;
-  editUser: (id: number, data: userData) => void;
+export type UserFormValues = z.infer<typeof UserSchema>;
+
+type UserFormProps = {
+  people: User[];
+  setPeople: Dispatch<SetStateAction<User[]>>;
+  onCancel: () => void;
+  id: number;
+  editUser: (id: number, data: UserFormValues) => void;
   edit: boolean;
-  currentFormData: any;
-  setCurrentFormData: (value: userData) => void;
+  onSubmit: (value: UserFormValues) => void;
+  defaultValues: UserFormValues;
 };
 
 const UserForm = ({
   people,
   setPeople,
-  setOpen,
+  onCancel,
+  onSubmit,
   id,
   editUser,
   edit,
-  currentFormData,
-  setCurrentFormData,
-}: userFormProps) => {
+  defaultValues
+}: UserFormProps) => {
   const [count, setCount] = useState<number>(1);
-
-  const currentUser = people.find((person) => id === person.id);
 
   const {
     register,
     handleSubmit,
-    getValues,
     trigger,
     formState: { errors },
     reset,
-  } = useForm<z.infer<typeof UserSchema>>({
+  } = useForm<UserFormValues>({
     resolver: zodResolver(UserSchema),
-    defaultValues: {
-      name: edit ? currentUser?.name : currentFormData.name,
-      direccion: edit ? currentUser?.direccion : currentFormData.direccion,
-      email: edit ? currentUser?.email : currentFormData.email,
-      pais: edit ? currentUser?.pais : currentFormData.pais,
-      gender: edit ? currentUser?.gender : currentFormData.gender,
-    },
+    defaultValues,
     mode: "onChange",
   });
 
-  const onSubmit: SubmitHandler<z.infer<typeof UserSchema>> = (
-    data: userData
+  const handleSubmit: SubmitHandler<UserFormValues> = (
+    data: User
   ) => {
-    localStorage.setItem("formData", JSON.stringify({ id: count, data }));
-    setPeople([
-      ...people,
-      {
-        id: count,
-        name: data.name,
-        direccion: data.direccion,
-        email: data.email,
-        pais: data.pais,
-        gender: data.gender,
-      },
-    ]);
-    setCount(count + 1);
+    onSubmit(data);
 
-    Swal.fire({
-      position: "center",
-      icon: "success",
-      title: "User created",
-      showConfirmButton: false,
-      timer: 1000,
-    });
+    // if (edit) {
+    //   editUser(id, data);
+    // } else {
+    //   setPeople([
+    //     ...people,
+    //     {
+    //       id: count,
+    //       name: data.name,
+    //       address: data.address,
+    //       email: data.email,
+    //       country: data.country,
+    //       gender: data.gender,
+    //     },
+    //   ]);
+    //   setCount(count + 1);
 
-    reset({
-      name: "",
-      direccion: "",
-      email: "",
-      pais: "",
-      gender: "",
-    });
+    //   Swal.fire({
+    //     position: "center",
+    //     icon: "success",
+    //     title: "User created",
+    //     showConfirmButton: false,
+    //     timer: 1000,
+    //   });
+    // }
   };
-
-  useEffect(() => {
-    setCurrentFormData(getValues());
-
-    return () => {
-      setCurrentFormData(getValues());
-    };
-  }, []);
 
   return (
     <div>
@@ -327,15 +309,15 @@ const UserForm = ({
           label="Dirección"
           type="text"
           placeholder="Your direction"
-          {...register("direccion")}
-          error={errors.direccion}
+          {...register("address")}
+          error={errors.address}
         />
         <Select
-          {...register("pais")}
+          {...register("country")}
           label="Pais"
           placeholder="Select a country"
-          error={errors.pais}
-          options={paises}
+          error={errors.country}
+          options={countries}
           width="full"
         />
         <div className="flex flex-col p-3">
@@ -353,50 +335,16 @@ const UserForm = ({
             type="button"
             className="mx-3 my-2 right-0 rounded-md bg-white px-3 py-2 text-sm border-violet-600 text-violet-600 shadow-sm ring-1 ring-inset ring-violet-600 hover:bg-gray-50"
             onClick={() => {
-              setCurrentFormData({
-                name: "",
-                direccion: "",
-                email: "",
-                pais: "",
-                gender: "",
-              });
-              reset({
-                name: "",
-                direccion: "",
-                email: "",
-                pais: "",
-                gender: "",
-              });
-              setOpen(false);
+              onCancel();
             }}
           >
             Cancel
           </button>
 
           <button
-            type={`${edit ? "button" : "submit"}`}
+            type="submit"
             className="rounded-md bg-violet-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            onClick={() => {
-              edit
-                ? Swal.fire({
-                    title: "Do you want to save the changes?",
-                    showDenyButton: true,
-                    showCancelButton: true,
-                    confirmButtonText: "Save",
-                    denyButtonText: `Don't save`,
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-                      Swal.fire("Saved!", "", "success");
-                    } else if (result.isDenied) {
-                      Swal.fire("Changes are not saved", "", "info");
-                    }
 
-                    trigger().then((status) => {
-                      status && editUser(id, getValues());
-                    });
-                  })
-                : null;
-            }}
           >
             {edit ? "Edit User" : "Save User"}
           </button>
