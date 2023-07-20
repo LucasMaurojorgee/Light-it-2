@@ -344,7 +344,6 @@ const UserForm = ({
           <button
             type="submit"
             className="rounded-md bg-violet-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-
           >
             {edit ? "Edit User" : "Save User"}
           </button>
