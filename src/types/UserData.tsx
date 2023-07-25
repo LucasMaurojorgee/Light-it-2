@@ -1,5 +1,4 @@
-export type User = {
-  id: number;
+export type UserData = {
   name: string;
   address: string;
   email: string;

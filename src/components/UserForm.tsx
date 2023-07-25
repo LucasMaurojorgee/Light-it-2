@@ -1,14 +1,13 @@
 "use client";
 
-import React, { SetStateAction, Dispatch, useState, useEffect } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import React from "react";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./Input";
 import Select from "./Select";
-import { Radious } from "./Radious";
-import { User } from "@/types/User";
-import Swal from "sweetalert2";
+import { Radio } from "./Radio";
+import { UserData } from "@/types/UserData";
 
 const countries = [
   "Afganistán",
@@ -223,70 +222,27 @@ const UserSchema = z.object({
 export type UserFormValues = z.infer<typeof UserSchema>;
 
 type UserFormProps = {
-  people: User[];
-  setPeople: Dispatch<SetStateAction<User[]>>;
   onCancel: () => void;
-  id: number;
-  editUser: (id: number, data: UserFormValues) => void;
   edit: boolean;
-  onSubmit: (value: UserFormValues) => void;
   defaultValues: UserFormValues;
+  onSubmit: (value: UserData) => void;
 };
 
 const UserForm = ({
-  people,
-  setPeople,
   onCancel,
-  onSubmit,
-  id,
-  editUser,
   edit,
-  defaultValues
+  defaultValues,
+  onSubmit,
 }: UserFormProps) => {
-  const [count, setCount] = useState<number>(1);
-
   const {
     register,
     handleSubmit,
-    trigger,
     formState: { errors },
-    reset,
   } = useForm<UserFormValues>({
     resolver: zodResolver(UserSchema),
     defaultValues,
     mode: "onChange",
   });
-
-  const handleSubmit: SubmitHandler<UserFormValues> = (
-    data: User
-  ) => {
-    onSubmit(data);
-
-    // if (edit) {
-    //   editUser(id, data);
-    // } else {
-    //   setPeople([
-    //     ...people,
-    //     {
-    //       id: count,
-    //       name: data.name,
-    //       address: data.address,
-    //       email: data.email,
-    //       country: data.country,
-    //       gender: data.gender,
-    //     },
-    //   ]);
-    //   setCount(count + 1);
-
-    //   Swal.fire({
-    //     position: "center",
-    //     icon: "success",
-    //     title: "User created",
-    //     showConfirmButton: false,
-    //     timer: 1000,
-    //   });
-    // }
-  };
 
   return (
     <div>
@@ -323,7 +279,7 @@ const UserForm = ({
         <div className="flex flex-col p-3">
           <p className="text-black text-base">Gender</p>
           {gender.map((e) => (
-            <Radious key={e} label={e} value={e} {...register("gender")} />
+            <Radio key={e} label={e} value={e} {...register("gender")} />
           ))}
           {errors.gender && (
             <p className="text-red-600 pt-1">{errors.gender.message}</p>

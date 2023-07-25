@@ -1,20 +1,28 @@
 {
   "users": [
     {
-      "id": 1,
       "name": "Lucas",
-      "direccion": "Portugal 3417",
-      "email": "lucas.maurojorge@gmail.com",
-      "pais": "Uruguay",
-      "gender": "Male"
+      "address": "ldkad",
+      "email": "djnasd@daslkda.co",
+      "country": "Kazajistán",
+      "gender": "male",
+      "id": 1
     },
     {
-      "id": 2,
-      "name": "Fausto",
-      "direccion": "Grecia 1214",
-      "email": "fasto.perez@gmail.com",
-      "pais": "Uruguay",
-      "gender": "Male"
+      "name": "kjsnda",
+      "address": "ldkad",
+      "email": "kadaosndokasndkalnasndslaknlasndas@asdas.co",
+      "country": "Kazajistán",
+      "gender": "male",
+      "id": 2
+    },
+    {
+      "name": "lklaksmd",
+      "address": "djad",
+      "email": "lkma@askdma.co",
+      "country": "Dinamarca",
+      "gender": "male",
+      "id": 3
     }
   ]
 }

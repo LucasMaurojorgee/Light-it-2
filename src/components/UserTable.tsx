@@ -1,37 +1,25 @@
 "use clien";
 
-import { userData } from "@/types/userData";
+import { User } from "@/types/User";
 import Image from "next/image";
 import userImg from "../../public/user.png";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import Swal from "sweetalert2";
 import axios from "axios";
-import { useQuery } from "react-query";
+import { useMutation } from "react-query";
 
 type tableProps = {
-  people: Array<userData>;
+  data?: User[];
   setOpen: (value: boolean) => void;
   setId: (value: number) => void;
   setEdit: (value: boolean) => void;
-  deleteUserById: (id: number) => void;
 };
 
-const getUsers = async () => {
-  const { data } = await axios.get<userData[]>("http://localhost:4000/users");
-
-  return data;
-};
-
-export const UserTable = ({
-  people,
-  setOpen,
-  setId,
-  setEdit,
-  deleteUserById,
-}: tableProps) => {
+export const UserTable = ({ data, setOpen, setId, setEdit }: tableProps) => {
   let count = 2;
 
-  const { data } = useQuery("users", getUsers);
+  const deleteUser = useMutation((id: number) => {
+    return axios.delete(`http://localhost:4000/users/${id}`);
+  });
 
   return (
     <div className=" flow-root w-full">
@@ -85,7 +73,7 @@ export const UserTable = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 ">
-              {people.map((person) => (
+              {data?.map((person) => (
                 <tr
                   className={`text-center ${
                     count % 2 === 0
@@ -103,9 +91,9 @@ export const UserTable = ({
                     />
                     {person.name}
                   </td>
-                  <td className="text-black">{person.direccion}</td>
+                  <td className="text-black">{person.address}</td>
                   <td className="text-black">{person.email}</td>
-                  <td className="text-black">{person.pais}</td>
+                  <td className="text-black">{person.country}</td>
                   <td className="text-black">{person.gender}</td>
                   <td>
                     <button
@@ -113,7 +101,7 @@ export const UserTable = ({
                       className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                       onClick={() => {
                         setOpen(true);
-                        person.id && setId(person.id);
+                        setId(person.id);
                         setEdit(true);
                       }}
                     >
@@ -124,25 +112,7 @@ export const UserTable = ({
                     <TrashIcon
                       className="text-black w-9 h-9 cursor-pointer"
                       onClick={() => {
-                        Swal.fire({
-                          title: "Are you sure?",
-                          text: "You won't be able to revert this!",
-                          icon: "warning",
-                          showCancelButton: true,
-                          confirmButtonColor: "#3085d6",
-                          cancelButtonColor: "#d33",
-                          confirmButtonText: "Yes, delete it!",
-                        }).then((result) => {
-                          if (result.isConfirmed) {
-                            Swal.fire(
-                              "User deleted!",
-                              "User has been deleted.",
-                              "success"
-                            );
-
-                            person.id && deleteUserById(person.id);
-                          }
-                        });
+                        deleteUser.mutate(person.id);
                       }}
                     />
                   </td>
