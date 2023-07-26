@@ -23,11 +23,20 @@ const postUser = async (data: UserData): Promise<void> => {
   await axios.post("http://localhost:4000/users", data);
 };
 
-const updateUser = async (id: number, data: UserData): Promise<void> => {
+// Arme la interfaz pero no es necesario (Depende el caso, en este son solo 2 props)
+interface UpdateUserProps {
+  id: number;
+  data: UserData;
+}
+
+// Después de verlo un poco más a detalle resulta que no podes enviar más de una prop en las mutaciones
+// Entonces solo parseamos los datos y los enviamos 👍🏻
+const updateUser = async ({ id, data }: UpdateUserProps): Promise<void> => {
   await axios.put(`http://localhost:4000/users/${id}`, data);
 };
 
-const userList = () => {
+// No fue un error pero cambié de userList => UserList, por convención siempre con mayúscula la primera letra
+const UserList = () => {
   const [open, setOpen] = useState(true);
   const [edit, setEdit] = useState<boolean>(false);
   const [id, setId] = useState<number>(0);
@@ -40,16 +49,21 @@ const userList = () => {
 
   const { mutate: postMutation } = useMutation({
     mutationFn: postUser,
-    mutationKey: "2",
   });
 
+  // Quedo igual, 0 drama acá
   const { mutate: updateMutation } = useMutation({
     mutationFn: updateUser,
-    mutationKey: "1",
+  });
+
+  // Agregamos la función que parsea los datos para enviarlos a la mutación
+  const parseUpdateData = (id: number, data: UserData) => ({
+    id,
+    data,
   });
 
   const onSubmit: SubmitHandler<UserFormValues> = (data: UserData) => {
-    edit ? updateMutation(id, data) : postMutation(data);
+    edit ? updateMutation(parseUpdateData(id, data)) : postMutation(data);
   };
 
   const closeSidebar = () => setOpen(false);
@@ -122,4 +136,4 @@ const userList = () => {
   );
 };
 
-export default userList;
+export default UserList;
