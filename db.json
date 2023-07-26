@@ -1,28 +1,3 @@
 {
-  "users": [
-    {
-      "name": "Lucas",
-      "address": "ldkad",
-      "email": "djnasd@daslkda.co",
-      "country": "Kazajistán",
-      "gender": "male",
-      "id": 1
-    },
-    {
-      "name": "kjsnda",
-      "address": "ldkad",
-      "email": "kadaosndokasndkalnasndslaknlasndas@asdas.co",
-      "country": "Kazajistán",
-      "gender": "male",
-      "id": 2
-    },
-    {
-      "name": "lklaksmd",
-      "address": "djad",
-      "email": "lkma@askdma.co",
-      "country": "Dinamarca",
-      "gender": "male",
-      "id": 3
-    }
-  ]
+  "users": []
 }

@@ -5,20 +5,30 @@ import Image from "next/image";
 import userImg from "../../public/user.png";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
-import { useMutation } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 
 type tableProps = {
   data?: User[];
   setOpen: (value: boolean) => void;
   setId: (value: number) => void;
   setEdit: (value: boolean) => void;
+  isLoading: boolean;
+};
+
+const deleteUser = async (id: number): Promise<void> => {
+  await axios.delete(`http://localhost:4000/users/${id}`);
 };
 
 export const UserTable = ({ data, setOpen, setId, setEdit }: tableProps) => {
   let count = 2;
 
-  const deleteUser = useMutation((id: number) => {
-    return axios.delete(`http://localhost:4000/users/${id}`);
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteMutation } = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
   });
 
   return (
@@ -112,7 +122,7 @@ export const UserTable = ({ data, setOpen, setId, setEdit }: tableProps) => {
                     <TrashIcon
                       className="text-black w-9 h-9 cursor-pointer"
                       onClick={() => {
-                        deleteUser.mutate(person.id);
+                        deleteMutation(person.id);
                       }}
                     />
                   </td>

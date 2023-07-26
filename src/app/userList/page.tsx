@@ -7,10 +7,10 @@ import { UserTable } from "@/components/UserTable";
 import { User } from "@/types/User";
 import { Menu } from "@headlessui/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import axios from "axios";
 import { UserData } from "@/types/UserData";
-import { SubmitHandler } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { UserFormValues } from "@/components/UserForm";
 
 const getUsers = async () => {
@@ -45,15 +45,21 @@ const UserList = () => {
     setOpen(false);
   }, []);
 
-  const { data } = useQuery("users", getUsers);
+  const { data, isLoading } = useQuery("users", getUsers);
 
   const { mutate: postMutation } = useMutation({
     mutationFn: postUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
   });
 
   // Quedo igual, 0 drama acá
   const { mutate: updateMutation } = useMutation({
     mutationFn: updateUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
   });
 
   // Agregamos la función que parsea los datos para enviarlos a la mutación
@@ -77,6 +83,8 @@ const UserList = () => {
     country: (edit ? currentUser?.country : "") ?? "",
     gender: (edit ? currentUser?.gender : "") ?? "",
   };
+
+  const queryClient = useQueryClient();
 
   return (
     <div className="bg-white h-screen">
@@ -126,6 +134,7 @@ const UserList = () => {
 
           <UserTable
             data={data}
+            isLoading={isLoading}
             setOpen={setOpen}
             setId={setId}
             setEdit={setEdit}
