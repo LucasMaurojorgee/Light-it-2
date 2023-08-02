@@ -37,13 +37,9 @@ const updateUser = async ({ id, data }: UpdateUserProps): Promise<void> => {
 
 // No fue un error pero cambié de userList => UserList, por convención siempre con mayúscula la primera letra
 const UserList = () => {
-  const [open, setOpen] = useState(true);
-  const [edit, setEdit] = useState<boolean>(false);
-  const [id, setId] = useState<number>(0);
-
-  useEffect(() => {
-    setOpen(false);
-  }, []);
+  const [open, setOpen] = useState(false);
+  const [id, setId] = useState(0);
+  const editingUser = data?.find((person: User) => id === person.id);
 
   const { data, isLoading } = useQuery("users", getUsers);
 
@@ -62,26 +58,18 @@ const UserList = () => {
     },
   });
 
-  // Agregamos la función que parsea los datos para enviarlos a la mutación
-  const parseUpdateData = (id: number, data: UserData) => ({
-    id,
-    data,
-  });
-
   const onSubmit: SubmitHandler<UserFormValues> = (data: UserData) => {
-    edit ? updateMutation(parseUpdateData(id, data)) : postMutation(data);
+    edit ? updateMutation({ id, data }) : postMutation(data);
   };
 
   const closeSidebar = () => setOpen(false);
 
-  const currentUser = data?.find((person: User) => id === person.id);
-
   const defaultValues = {
-    name: (edit ? currentUser?.name : "") ?? "",
-    address: (edit ? currentUser?.address : "") ?? "",
-    email: (edit ? currentUser?.email : "") ?? "",
-    country: (edit ? currentUser?.country : "") ?? "",
-    gender: (edit ? currentUser?.gender : "") ?? "",
+    name: editingUser?.name ?? "",
+    address: editingUser?.address ?? "",
+    email: editingUser?.email ?? "",
+    country: editingUser?.country ?? "",
+    gender: editingUser?.gender ?? "",
   };
 
   const queryClient = useQueryClient();
@@ -89,20 +77,20 @@ const UserList = () => {
   return (
     <div className="bg-white h-screen">
       <div className="w-full">
-        {open && (
-          <SideBar
-            open={true}
-            onClose={closeSidebar}
-            title={`${edit ? "User edit" : "User registration"}`}
-          >
+        <SideBar
+          open={open}
+          onClose={closeSidebar}
+          title={`${!!editingUser ? "User edit" : "User registration"}`}
+        >
+          {open && (
             <UserForm
               onCancel={closeSidebar}
-              edit={edit}
+              edit={!!editingUser}
               defaultValues={defaultValues}
               onSubmit={onSubmit}
             />
-          </SideBar>
-        )}
+          )}
+        </SideBar>
 
         <div className={`${open && "blur-sm"}`}>
           <div className={`bg-white w-full border-b-2 flex justify-between`}>
@@ -119,7 +107,7 @@ const UserList = () => {
                   className="flex items-center rounded-full text-black hover:text-gray-600"
                   onClick={() => {
                     setOpen(true);
-                    setEdit(false);
+                    setId(0);
                   }}
                 >
                   <span className="sr-only">Open options</span>
@@ -135,9 +123,10 @@ const UserList = () => {
           <UserTable
             data={data}
             isLoading={isLoading}
-            setOpen={setOpen}
-            setId={setId}
-            setEdit={setEdit}
+            onEdit={(id) => {
+              setId(id);
+              setOpen(true);
+            }}
           />
         </div>
       </div>

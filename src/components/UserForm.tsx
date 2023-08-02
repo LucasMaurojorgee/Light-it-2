@@ -252,27 +252,27 @@ const UserForm = ({
           type="text"
           placeholder="Your name"
           {...register("name")}
-          error={errors.name}
+          error={errors.name.message}
         />
         <Input
           label=" Email"
           type="email"
           placeholder="example@gmail.com"
           {...register("email")}
-          error={errors.email}
+          error={errors.email.message}
         />
         <Input
           label="Dirección"
           type="text"
           placeholder="Your direction"
           {...register("address")}
-          error={errors.address}
+          error={errors.address.message}
         />
         <Select
           {...register("country")}
           label="Pais"
           placeholder="Select a country"
-          error={errors.country}
+          error={errors.country.message}
           options={countries}
           width="full"
         />

@@ -9,9 +9,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 type tableProps = {
   data?: User[];
-  setOpen: (value: boolean) => void;
-  setId: (value: number) => void;
-  setEdit: (value: boolean) => void;
+  onEdit: (id: number) => void;
   isLoading: boolean;
 };
 
@@ -19,9 +17,7 @@ const deleteUser = async (id: number): Promise<void> => {
   await axios.delete(`http://localhost:4000/users/${id}`);
 };
 
-export const UserTable = ({ data, setOpen, setId, setEdit }: tableProps) => {
-  let count = 2;
-
+export const UserTable = ({ data, onEdit }: tableProps) => {
   const queryClient = useQueryClient();
 
   const { mutate: deleteMutation } = useMutation({
@@ -83,12 +79,12 @@ export const UserTable = ({ data, setOpen, setId, setEdit }: tableProps) => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 ">
-              {data?.map((person) => (
+              {data?.map((person, count) => (
                 <tr
                   className={`text-center ${
                     count % 2 === 0
-                      ? count++ && "bg-[#F9FAFB]"
-                      : count++ && "bg-white"
+                      ? "bg-[#F9FAFB]"
+                      : "bg-white"
                   }`}
                 >
                   <td className="text-sm font-medium text-black sm:pl-0 py-8  flex items-center justify-center">
@@ -110,9 +106,7 @@ export const UserTable = ({ data, setOpen, setId, setEdit }: tableProps) => {
                       type="button"
                       className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                       onClick={() => {
-                        setOpen(true);
-                        setId(person.id);
-                        setEdit(true);
+                        onEdit(person.id);
                       }}
                     >
                       Edit
