@@ -1,9 +1,14 @@
+"use client";
+
 import UserList from "./userList/page";
+import { QueryClient, QueryClientProvider } from "react-query";
+
+const queryClient = new QueryClient();
 
 export default function Home() {
   return (
-    <>
-      <UserList />
-    </>
+      <QueryClientProvider client={queryClient}>
+        <UserList />
+      </QueryClientProvider>
   );
 }

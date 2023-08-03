@@ -1,92 +1,119 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
 import UserForm from "@/components/UserForm";
 import { UserTable } from "@/components/UserTable";
-import { userData } from "@/types/userData";
+import { User } from "@/types/User";
 import { Menu } from "@headlessui/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import axios from "axios";
+import { UserData } from "@/types/UserData";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { UserFormValues } from "@/components/UserForm";
 
-const defaultUser = {
-  name: "",
-  direccion: "",
-  email: "",
-  pais: "",
-  gender: "",
+const getUsers = async () => {
+  const { data } = await axios.get<User[]>("http://localhost:4000/users");
+
+  return data;
 };
 
-const userList = () => {
-  const [open, setOpen] = useState(true);
-  const [people, setPeople] = useState<userData[]>([]);
-  const [edit, setEdit] = useState<boolean>(false);
-  const [id, setId] = useState<number>();
-  const [currentFormData, setCurrentFormData] = useState<userData>(defaultUser);
+const postUser = async (data: UserData): Promise<void> => {
+  await axios.post("http://localhost:4000/users", data);
+};
 
-  const editUser = (id: number, data: userData) => {
-    const peopleCopy = [...people];
-    const index = peopleCopy.findIndex((person) => person.id === id);
+// Arme la interfaz pero no es necesario (Depende el caso, en este son solo 2 props)
+interface UpdateUserProps {
+  id: number;
+  data: UserData;
+}
 
-    peopleCopy[index] = {
-      id: people[index].id,
-      name: data.name,
-      direccion: data.direccion,
-      email: data.email,
-      pais: data.pais,
-      gender: data.gender,
-    };
+// Después de verlo un poco más a detalle resulta que no podes enviar más de una prop en las mutaciones
+// Entonces solo parseamos los datos y los enviamos 👍🏻
+const updateUser = async ({ id, data }: UpdateUserProps): Promise<void> => {
+  await axios.put(`http://localhost:4000/users/${id}`, data);
+};
 
-    setPeople(peopleCopy);
+// No fue un error pero cambié de userList => UserList, por convención siempre con mayúscula la primera letra
+const UserList = () => {
+  const [open, setOpen] = useState(false);
+  const [id, setId] = useState(0);
+  const editingUser = data?.find((person: User) => id === person.id);
+
+  const { data, isLoading } = useQuery("users", getUsers);
+
+  const { mutate: postMutation } = useMutation({
+    mutationFn: postUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+
+  // Quedo igual, 0 drama acá
+  const { mutate: updateMutation } = useMutation({
+    mutationFn: updateUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+  });
+
+  const onSubmit: SubmitHandler<UserFormValues> = (data: UserData) => {
+    edit ? updateMutation({ id, data }) : postMutation(data);
   };
 
-  const deleteUserById = (id: number) => {
-    const peopleCopy = people.filter((people) => people.id != id);
+  const closeSidebar = () => setOpen(false);
 
-    setPeople(peopleCopy);
+  const defaultValues = {
+    name: editingUser?.name ?? "",
+    address: editingUser?.address ?? "",
+    email: editingUser?.email ?? "",
+    country: editingUser?.country ?? "",
+    gender: editingUser?.gender ?? "",
   };
+
+  const queryClient = useQueryClient();
 
   return (
-    <div className='bg-white h-screen'>
-      <div className='w-full'>
+    <div className="bg-white h-screen">
+      <div className="w-full">
         <SideBar
           open={open}
-          setOpen={setOpen}
-          title={`${edit ? "User edit" : "User registration"}`}
+          onClose={closeSidebar}
+          title={`${!!editingUser ? "User edit" : "User registration"}`}
         >
-          <UserForm
-            people={people}
-            setPeople={setPeople}
-            setOpen={setOpen}
-            edit={edit}
-            editUser={editUser}
-            id={id}
-            currentFormData={currentFormData}
-            setCurrentFormData={setCurrentFormData}
-          />
+          {open && (
+            <UserForm
+              onCancel={closeSidebar}
+              edit={!!editingUser}
+              defaultValues={defaultValues}
+              onSubmit={onSubmit}
+            />
+          )}
         </SideBar>
 
         <div className={`${open && "blur-sm"}`}>
           <div className={`bg-white w-full border-b-2 flex justify-between`}>
-            <h1 className='text-3xl font-semibold text-black py-6 px-8'>
+            <h1 className="text-3xl font-semibold text-black py-6 px-8">
               Registered users
             </h1>
 
             <Menu
-              as='div'
-              className='relative text-left flex items-center mr-6'
+              as="div"
+              className="relative text-left flex items-center mr-6"
             >
               <div>
                 <button
-                  className='flex items-center rounded-full text-black hover:text-gray-600'
+                  className="flex items-center rounded-full text-black hover:text-gray-600"
                   onClick={() => {
                     setOpen(true);
-                    setEdit(false);
+                    setId(0);
                   }}
                 >
-                  <span className='sr-only'>Open options</span>
+                  <span className="sr-only">Open options</span>
                   <EllipsisVerticalIcon
-                    className='h-10 w-10'
-                    aria-hidden='true'
+                    className="h-10 w-10"
+                    aria-hidden="true"
                   />
                 </button>
               </div>
@@ -94,11 +121,12 @@ const userList = () => {
           </div>
 
           <UserTable
-            people={people}
-            setOpen={setOpen}
-            setId={setId}
-            setEdit={setEdit}
-            deleteUserById={deleteUserById}
+            data={data}
+            isLoading={isLoading}
+            onEdit={(id) => {
+              setId(id);
+              setOpen(true);
+            }}
           />
         </div>
       </div>
@@ -106,4 +134,4 @@ const userList = () => {
   );
 };
 
-export default userList;
+export default UserList;

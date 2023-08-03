@@ -1,16 +1,15 @@
 "use client";
 
-import React, { SetStateAction, Dispatch, useState, useEffect } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import React from "react";
+import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "./Input";
 import Select from "./Select";
-import { Radious } from "./Radious";
-import { userData } from "@/types/userData";
-import Swal from "sweetalert2";
+import { Radio } from "./Radio";
+import { UserData } from "@/types/UserData";
 
-const paises = [
+const countries = [
   "Afganistán",
   "Albania",
   "Alemania",
@@ -208,193 +207,99 @@ const paises = [
   "Zimbabue",
 ];
 
-const gender = ["male", "female", "intersex"];
+const gender = ["male", "female", "intersex", "non-binary"];
 
-const UserSchema: z.ZodType<userData> = z.object({
-  name: z.string().min(2).nonempty(),
-  direccion: z.string().min(2).nonempty(),
-  email: z.string().email().nonempty(),
-  pais: z.string().nonempty("You have to select a country"),
+const UserSchema = z.object({
+  name: z.string().min(1),
+  address: z.string().min(1),
+  email: z.string().email(),
+  country: z.string().nonempty("You have to select a country"),
   gender: z.string({
     invalid_type_error: "Select your gender",
   }),
 });
 
-type userFormProps = {
-  people: userData[];
-  setPeople: Dispatch<SetStateAction<userData[]>>;
-  setOpen: (value: boolean) => void;
-  id: any;
-  editUser: (id: number, data: userData) => void;
+export type UserFormValues = z.infer<typeof UserSchema>;
+
+type UserFormProps = {
+  onCancel: () => void;
   edit: boolean;
-  currentFormData: any;
-  setCurrentFormData: (value: userData) => void;
+  defaultValues: UserFormValues;
+  onSubmit: (value: UserData) => void;
 };
 
 const UserForm = ({
-  people,
-  setPeople,
-  setOpen,
-  id,
-  editUser,
+  onCancel,
   edit,
-  currentFormData,
-  setCurrentFormData,
-}: userFormProps) => {
-  const [count, setCount] = useState<number>(1);
-
-  const currentUser = people.find((person) => id === person.id);
-
+  defaultValues,
+  onSubmit,
+}: UserFormProps) => {
   const {
     register,
     handleSubmit,
-    getValues,
-    trigger,
     formState: { errors },
-    reset,
-  } = useForm<z.infer<typeof UserSchema>>({
+  } = useForm<UserFormValues>({
     resolver: zodResolver(UserSchema),
-    defaultValues: {
-      name: edit ? currentUser?.name : currentFormData.name,
-      direccion: edit ? currentUser?.direccion : currentFormData.direccion,
-      email: edit ? currentUser?.email : currentFormData.email,
-      pais: edit ? currentUser?.pais : currentFormData.pais,
-      gender: edit ? currentUser?.gender : currentFormData.gender,
-    },
+    defaultValues,
     mode: "onChange",
   });
 
-  const onSubmit: SubmitHandler<z.infer<typeof UserSchema>> = (
-    data: userData
-  ) => {
-    localStorage.setItem("formData", JSON.stringify({ id: count, data }));
-    setPeople([
-      ...people,
-      {
-        id: count,
-        name: data.name,
-        direccion: data.direccion,
-        email: data.email,
-        pais: data.pais,
-        gender: data.gender,
-      },
-    ]);
-    setCount(count + 1);
-
-    Swal.fire({
-      position: "center",
-      icon: "success",
-      title: "User created",
-      showConfirmButton: false,
-      timer: 1000,
-    });
-
-    reset({
-      name: "",
-      direccion: "",
-      email: "",
-      pais: "",
-      gender: "",
-    });
-  };
-
-  useEffect(() => {
-    setCurrentFormData(getValues());
-
-    return () => {
-      setCurrentFormData(getValues());
-    };
-  }, []);
-
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)} className=''>
+      <form onSubmit={handleSubmit(onSubmit)} className="">
         <Input
-          label='Name'
-          type='text'
-          placeholder='Your name'
+          label="Name"
+          type="text"
+          placeholder="Your name"
           {...register("name")}
-          error={errors.name}
+          error={errors.name.message}
         />
         <Input
-          label=' Email'
-          type='email'
-          placeholder='example@gmail.com'
+          label=" Email"
+          type="email"
+          placeholder="example@gmail.com"
           {...register("email")}
-          error={errors.email}
+          error={errors.email.message}
         />
         <Input
-          label='Dirección'
-          type='text'
-          placeholder='Your direction'
-          {...register("direccion")}
-          error={errors.direccion}
+          label="Dirección"
+          type="text"
+          placeholder="Your direction"
+          {...register("address")}
+          error={errors.address.message}
         />
         <Select
-          {...register("pais")}
-          label='Pais'
-          placeholder='Select a country'
-          error={errors.pais}
-          options={paises}
-          width='full'
+          {...register("country")}
+          label="Pais"
+          placeholder="Select a country"
+          error={errors.country.message}
+          options={countries}
+          width="full"
         />
-        <div className='flex flex-col p-3'>
-          <p className='text-black text-base'>Gender</p>
+        <div className="flex flex-col p-3">
+          <p className="text-black text-base">Gender</p>
           {gender.map((e) => (
-            <Radious key={e} label={e} value={e} {...register("gender")} />
+            <Radio key={e} label={e} value={e} {...register("gender")} />
           ))}
           {errors.gender && (
-            <p className='text-red-600 pt-1'>{errors.gender.message}</p>
+            <p className="text-red-600 pt-1">{errors.gender.message}</p>
           )}
         </div>
 
-        <div className='float-right'>
+        <div className="float-right">
           <button
-            type='button'
-            className='mx-3 my-2 right-0 rounded-md bg-white px-3 py-2 text-sm border-violet-600 text-violet-600 shadow-sm ring-1 ring-inset ring-violet-600 hover:bg-gray-50'
+            type="button"
+            className="mx-3 my-2 right-0 rounded-md bg-white px-3 py-2 text-sm border-violet-600 text-violet-600 shadow-sm ring-1 ring-inset ring-violet-600 hover:bg-gray-50"
             onClick={() => {
-              setCurrentFormData({
-                name: "",
-                direccion: "",
-                email: "",
-                pais: "",
-                gender: "",
-              });
-              reset({
-                name: "",
-                direccion: "",
-                email: "",
-                pais: "",
-                gender: "",
-              });
-              setOpen(false);
+              onCancel();
             }}
           >
             Cancel
           </button>
 
           <button
-            type={`${edit ? "button" : "submit"}`}
-            className='rounded-md bg-violet-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-            onClick={() => {
-              edit
-                ? Swal.fire({
-                    title: "Do you want to save the changes?",
-                    showDenyButton: true,
-                    confirmButtonText: "Save",
-                    denyButtonText: `Don't save`,
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-                      Swal.fire("Saved!", "", "success");
-                      trigger().then((status) => {
-                        status && editUser(id, getValues());
-                      });
-                    } else if (result.isDenied) {
-                      Swal.fire("Changes are not saved", "", "info");
-                    }
-                  })
-                : null;
-            }}
+            type="submit"
+            className="rounded-md bg-violet-600 px-4 py-2 text-sm text-white shadow-sm hover:bg-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
             {edit ? "Edit User" : "Save User"}
           </button>
